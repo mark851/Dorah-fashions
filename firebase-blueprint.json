@@ -40,9 +40,9 @@
         },
         "imageUrl": {
           "type": "string",
-          "description": "Primary product image URL (Firebase Storage, Google Drive, or static asset).",
+          "description": "Primary product image URL or compressed Firebase Data URL.",
           "minLength": 5,
-          "maxLength": 1000
+          "maxLength": 750000
         },
         "colors": {
           "type": "array",
@@ -303,9 +303,9 @@
         },
         "imageUrl": {
           "type": "string",
-          "description": "Banner showcase image URL.",
+          "description": "Banner showcase image URL or compressed Firebase Data URL.",
           "minLength": 5,
-          "maxLength": 1000
+          "maxLength": 750000
         },
         "active": {
           "type": "boolean",

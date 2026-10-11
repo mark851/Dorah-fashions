@@ -33,7 +33,10 @@ declare global {
   }
 }
 
-const BOOTSTRAPPED_ADMIN_EMAIL = 'markniaras@gmail.com';
+const ADMIN_EMAILS = [
+  'markniaras@gmail.com',
+  'namatakadoreen89@gmail.com',
+];
 const ALLOWED_PRODUCTION_ORIGINS = [
   'https://dorafashions.online',
   'https://www.dorafashions.online',
@@ -176,7 +179,7 @@ async function startServer() {
         return;
       }
 
-      if (user.email.toLowerCase() === BOOTSTRAPPED_ADMIN_EMAIL.toLowerCase()) {
+      if (ADMIN_EMAILS.includes(user.email.trim().toLowerCase())) {
         next();
         return;
       }
@@ -328,9 +331,9 @@ async function startServer() {
     if (
       typeof imageUrl !== 'string' ||
       imageUrl.trim().length < 5 ||
-      imageUrl.length > 1000
+      imageUrl.length > 750000
     ) {
-      errors.push('Image URL must be 5–1000 characters.');
+      errors.push('Image URL or uploaded photo data must be valid.');
     }
     if (
       colors !== undefined &&

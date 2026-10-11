@@ -204,7 +204,7 @@ export const VALIDATION_RULES = {
     DESC_MIN: 5,
     DESC_MAX: 1200,
     IMAGE_MIN: 5,
-    IMAGE_MAX: 1000,
+    IMAGE_MAX: 750000,
     COLORS_MIN: 1,
     COLORS_MAX: 8,
     SIZES_MIN: 1,
@@ -247,7 +247,7 @@ export const VALIDATION_RULES = {
     CTA_MIN: 2,
     CTA_MAX: 40,
     IMAGE_MIN: 5,
-    IMAGE_MAX: 1000,
+    IMAGE_MAX: 750000,
   },
   REVIEW: {
     NAME_MIN: 2,

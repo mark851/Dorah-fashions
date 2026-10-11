@@ -62,7 +62,7 @@ service cloud.firestore {
       data.price is number && data.price >= 0 && data.price <= 100000000 &&
       data.stock is number && data.stock >= 0 && data.stock <= 100000 &&
       data.description is string && data.description.size() >= 5 && data.description.size() <= 1200 &&
-      data.imageUrl is string && data.imageUrl.size() >= 5 && data.imageUrl.size() <= 1000 &&
+      data.imageUrl is string && data.imageUrl.size() >= 5 && data.imageUrl.size() <= 750000 &&
       (!('colors' in data) || (data.colors is list && data.colors.size() >= 1 && data.colors.size() <= 8 && data.colors[0] is string && data.colors[0].size() <= 30)) &&
       data.sizes is list && data.sizes.size() >= 1 && data.sizes.size() <= 8 && data.sizes[0] is string && data.sizes[0].size() <= 30 &&
       data.published is bool &&
@@ -136,7 +136,7 @@ service cloud.firestore {
       data.subtitle is string && data.subtitle.size() >= 2 && data.subtitle.size() <= 350 &&
       data.badgeText is string && data.badgeText.size() >= 2 && data.badgeText.size() <= 80 &&
       data.ctaText is string && data.ctaText.size() >= 2 && data.ctaText.size() <= 40 &&
-      data.imageUrl is string && data.imageUrl.size() >= 5 && data.imageUrl.size() <= 1000 &&
+      data.imageUrl is string && data.imageUrl.size() >= 5 && data.imageUrl.size() <= 750000 &&
       data.active is bool &&
       data.authorId is string && data.authorId.size() >= 1 && data.authorId.size() <= 128 && data.authorId.matches('^[a-zA-Z0-9_\\-]+$') &&
       data.createdAt is timestamp &&
