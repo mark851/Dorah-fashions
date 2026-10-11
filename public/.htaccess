@@ -1,0 +1,21 @@
+<IfModule mod_headers.c>
+  # Allow Firebase Authentication (signInWithPopup) to communicate with dorafashions.online on cPanel
+  Header always set Cross-Origin-Opener-Policy "same-origin-allow-popups"
+</IfModule>
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Force HTTPS for dorafashions.online (Spaceship DNS -> cPanel)
+  RewriteCond %{HTTPS} !=on
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+  # Do not rewrite existing files, directories, or /api routes
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_URI} !^/api/
+
+  # Route all storefront and admin paths to index.html
+  RewriteRule ^ index.html [QSA,L]
+</IfModule>

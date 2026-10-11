@@ -1,0 +1,465 @@
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "A bead product, handcrafted beaded bag, or bead accessory listed in the DORAH FASHIONS catalogue.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Display title of the bead product or creation.",
+          "minLength": 2,
+          "maxLength": 120
+        },
+        "sku": {
+          "type": "string",
+          "description": "Unique catalogue SKU identifier.",
+          "minLength": 2,
+          "maxLength": 40,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "category": {
+          "type": "string",
+          "description": "Product shop category.",
+          "minLength": 2,
+          "maxLength": 60
+        },
+        "price": {
+          "type": "number",
+          "description": "Unit price in UGX (Ugandan Shillings)."
+        },
+        "stock": {
+          "type": "number",
+          "description": "Available inventory units."
+        },
+        "description": {
+          "type": "string",
+          "description": "Product description, bead finish, and crafting details.",
+          "minLength": 5,
+          "maxLength": 1200
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "Primary product image URL (Firebase Storage, Google Drive, or static asset).",
+          "minLength": 5,
+          "maxLength": 1000
+        },
+        "colors": {
+          "type": "array",
+          "description": "Available bead or bag colors (bounded 1 to 8 options)."
+        },
+        "sizes": {
+          "type": "array",
+          "description": "Available bead sizes (e.g. 8mm, 10mm, 12mm), pack weights, or dimensions (bounded 1 to 8 options)."
+        },
+        "published": {
+          "type": "boolean",
+          "description": "Whether the product is visible on the public website."
+        },
+        "featured": {
+          "type": "boolean",
+          "description": "Whether the product is highlighted in the featured showcase."
+        },
+        "authorId": {
+          "type": "string",
+          "description": "UID of the administrator who created the product.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of creation."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of last modification."
+        }
+      },
+      "required": [
+        "name",
+        "sku",
+        "category",
+        "price",
+        "stock",
+        "description",
+        "imageUrl",
+        "colors",
+        "sizes",
+        "published",
+        "featured",
+        "authorId",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Order": {
+      "title": "Order",
+      "description": "A customer purchase order submitted through DORAH FASHIONS in UGX.",
+      "type": "object",
+      "properties": {
+        "orderNumber": {
+          "type": "string",
+          "description": "Human-readable order reference code.",
+          "minLength": 4,
+          "maxLength": 40,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "customerId": {
+          "type": "string",
+          "description": "UID of the authenticated customer who placed the order.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "customerName": {
+          "type": "string",
+          "description": "Full name of the recipient.",
+          "minLength": 2,
+          "maxLength": 120
+        },
+        "customerEmail": {
+          "type": "string",
+          "description": "Customer email address for order receipts.",
+          "minLength": 3,
+          "maxLength": 160
+        },
+        "customerPhone": {
+          "type": "string",
+          "description": "Customer phone number for delivery coordination.",
+          "minLength": 5,
+          "maxLength": 40
+        },
+        "deliveryLocation": {
+          "type": "string",
+          "description": "Selected delivery region or city zone.",
+          "minLength": 2,
+          "maxLength": 120
+        },
+        "shippingAddress": {
+          "type": "string",
+          "description": "Street address, landmark, and area details.",
+          "minLength": 5,
+          "maxLength": 400
+        },
+        "postalCode": {
+          "type": "string",
+          "description": "Postal code or area code.",
+          "minLength": 2,
+          "maxLength": 24
+        },
+        "paymentMethod": {
+          "type": "string",
+          "description": "Selected payment method.",
+          "enum": ["Cash on Delivery", "Mobile Money", "Card Payment"]
+        },
+        "itemsSummary": {
+          "type": "string",
+          "description": "Formatted summary of ordered items, colors, sizes, and quantities in UGX.",
+          "minLength": 2,
+          "maxLength": 1500
+        },
+        "itemCount": {
+          "type": "number",
+          "description": "Total number of units in the order."
+        },
+        "subtotal": {
+          "type": "number",
+          "description": "Order subtotal in UGX."
+        },
+        "shippingFee": {
+          "type": "number",
+          "description": "Delivery fee in UGX."
+        },
+        "totalAmount": {
+          "type": "number",
+          "description": "Final order total in UGX."
+        },
+        "status": {
+          "type": "string",
+          "description": "Fulfillment lifecycle status.",
+          "enum": ["pending", "processing", "shipped", "delivered", "cancelled"]
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when order was placed."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when order was last updated."
+        }
+      },
+      "required": [
+        "orderNumber",
+        "customerId",
+        "customerName",
+        "customerEmail",
+        "customerPhone",
+        "deliveryLocation",
+        "shippingAddress",
+        "postalCode",
+        "paymentMethod",
+        "itemsSummary",
+        "itemCount",
+        "subtotal",
+        "shippingFee",
+        "totalAmount",
+        "status",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Category": {
+      "title": "Category",
+      "description": "A product category managed in the DORAH FASHIONS admin dashboard.",
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Category display name.",
+          "minLength": 2,
+          "maxLength": 60
+        },
+        "slug": {
+          "type": "string",
+          "description": "URL-safe category identifier.",
+          "minLength": 2,
+          "maxLength": 60,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "description": {
+          "type": "string",
+          "description": "Short description of the bead or accessory category.",
+          "minLength": 2,
+          "maxLength": 300
+        },
+        "active": {
+          "type": "boolean",
+          "description": "Whether the category is visible in storefront filters."
+        },
+        "sortOrder": {
+          "type": "number",
+          "description": "Display sort order index."
+        },
+        "authorId": {
+          "type": "string",
+          "description": "UID of the administrator who created the category.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "name",
+        "slug",
+        "description",
+        "active",
+        "sortOrder",
+        "authorId",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Banner": {
+      "title": "Banner",
+      "description": "A promotional or hero banner managed in the DORAH FASHIONS admin dashboard.",
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Banner headline.",
+          "minLength": 2,
+          "maxLength": 120
+        },
+        "subtitle": {
+          "type": "string",
+          "description": "Supporting promotional copy.",
+          "minLength": 2,
+          "maxLength": 350
+        },
+        "badgeText": {
+          "type": "string",
+          "description": "Eyebrow badge label.",
+          "minLength": 2,
+          "maxLength": 80
+        },
+        "ctaText": {
+          "type": "string",
+          "description": "Primary button label.",
+          "minLength": 2,
+          "maxLength": 40
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "Banner showcase image URL.",
+          "minLength": 5,
+          "maxLength": 1000
+        },
+        "active": {
+          "type": "boolean",
+          "description": "Whether this banner is active on the public website."
+        },
+        "authorId": {
+          "type": "string",
+          "description": "UID of the administrator.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "title",
+        "subtitle",
+        "badgeText",
+        "ctaText",
+        "imageUrl",
+        "active",
+        "authorId",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "Review": {
+      "title": "Review",
+      "description": "A customer review and star rating for DORAH FASHIONS creations.",
+      "type": "object",
+      "properties": {
+        "customerName": {
+          "type": "string",
+          "description": "Name of the reviewer.",
+          "minLength": 2,
+          "maxLength": 80
+        },
+        "customerLocation": {
+          "type": "string",
+          "description": "City or region of the reviewer.",
+          "minLength": 2,
+          "maxLength": 80
+        },
+        "productName": {
+          "type": "string",
+          "description": "Reviewed bead or bag product name.",
+          "minLength": 2,
+          "maxLength": 120
+        },
+        "rating": {
+          "type": "number",
+          "description": "Star rating from 1 to 5."
+        },
+        "comment": {
+          "type": "string",
+          "description": "Customer testimonial comment.",
+          "minLength": 5,
+          "maxLength": 600
+        },
+        "approved": {
+          "type": "boolean",
+          "description": "Whether approved by administrator for public display."
+        },
+        "authorId": {
+          "type": "string",
+          "description": "UID of the creator.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "customerName",
+        "customerLocation",
+        "productName",
+        "rating",
+        "comment",
+        "approved",
+        "authorId",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "AdminRole": {
+      "title": "AdminRole",
+      "description": "Administrator record granting catalogue and order management privileges.",
+      "type": "object",
+      "properties": {
+        "uid": {
+          "type": "string",
+          "description": "Firebase Auth UID of the administrator.",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[a-zA-Z0-9_\\-]+$"
+        },
+        "email": {
+          "type": "string",
+          "description": "Verified administrator email.",
+          "minLength": 3,
+          "maxLength": 160
+        },
+        "role": {
+          "type": "string",
+          "description": "Role designation.",
+          "enum": ["admin"]
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp of role assignment."
+        }
+      },
+      "required": ["uid", "email", "role", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/products/{productId}": {
+      "schema": { "$ref": "#/entities/Product" },
+      "description": "Storefront bead and beaded bag catalogue priced in UGX. Published items are readable by public visitors; all mutations require administrator privileges."
+    },
+    "/orders/{orderId}": {
+      "schema": { "$ref": "#/entities/Order" },
+      "description": "Customer orders containing shipping PII and delivery locations in UGX. Strictly isolated to the order creator (customerId) and store administrators."
+    },
+    "/categories/{categoryId}": {
+      "schema": { "$ref": "#/entities/Category" },
+      "description": "Storefront bead and accessory categories managed by the administrator."
+    },
+    "/banners/{bannerId}": {
+      "schema": { "$ref": "#/entities/Banner" },
+      "description": "Website hero and promotional banners managed by the administrator."
+    },
+    "/reviews/{reviewId}": {
+      "schema": { "$ref": "#/entities/Review" },
+      "description": "Customer reviews and ratings moderated by the administrator."
+    },
+    "/admins/{adminId}": {
+      "schema": { "$ref": "#/entities/AdminRole" },
+      "description": "Trusted administrator lookup table used by Firestore security rules."
+    }
+  }
+}

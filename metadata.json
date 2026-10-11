@@ -1,0 +1,6 @@
+{
+  "name": "DORAH FASHIONS — Luxury E-Commerce & Admin Suite",
+  "description": "Official e-commerce storefront, real-time inventory, customer order system, Google Drive media manager, and Firebase administrator dashboard for DORAH FASHIONS (dorafashions.online).",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
