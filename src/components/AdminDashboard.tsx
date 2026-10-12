@@ -465,7 +465,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     setDescription('');
     setImageUrl(INITIAL_DORAH_PRODUCTS[0].imageUrl);
     setColorsInput('Champagne Gold, Ivory Pearl, Turquoise');
-    setSizesInput('8mm (500g), 10mm (500g), 12mm (1kg)');
+    setSizesInput('Small, Medium, Large');
     setPublished(true);
     setFeatured(false);
     setFormError(null);
@@ -2736,7 +2736,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-[#2C1E16] mb-1">
-                    Available Colors (comma-separated, max 8) *
+                    Available Colors *
                   </label>
                   <input
                     type="text"
@@ -2749,16 +2749,62 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-[#2C1E16] mb-1">
-                    Sizes / Pack Options (comma-separated, max 8) *
+                    Sizes of Products *
                   </label>
                   <input
                     type="text"
                     required
                     value={sizesInput}
                     onChange={(e) => setSizesInput(e.target.value)}
-                    placeholder="8mm (500g), 10mm (1kg), Standard"
+                    placeholder="Small, Medium, Large, Standard, 8mm (500g)"
                     className="w-full px-3.5 py-2 text-sm bg-[#FFFFFF] border border-[#E2D5C3] rounded-xl"
                   />
+                  <div className="flex flex-wrap gap-1.5 mt-2">
+                    {[
+                      'Mini',
+                      'Small',
+                      'Medium',
+                      'Large',
+                      'Standard',
+                      '6mm (250g)',
+                      '8mm (500g)',
+                      '10mm (500g)',
+                      '12mm (1kg)',
+                    ].map((presetSize) => {
+                      const currentSizes = sizesInput
+                        .split(',')
+                        .map((s) => s.trim())
+                        .filter(Boolean);
+                      const isSelected = currentSizes.includes(presetSize);
+                      return (
+                        <button
+                          key={presetSize}
+                          type="button"
+                          onClick={() => {
+                            if (isSelected) {
+                              const next = currentSizes.filter(
+                                (s) => s !== presetSize
+                              );
+                              setSizesInput(next.join(', '));
+                            } else {
+                              const next = [...currentSizes, presetSize].slice(
+                                0,
+                                VALIDATION_RULES.PRODUCT.SIZES_MAX
+                              );
+                              setSizesInput(next.join(', '));
+                            }
+                          }}
+                          className={`px-2.5 py-1 text-[11px] font-semibold rounded-lg border transition-colors cursor-pointer ${
+                            isSelected
+                              ? 'bg-[#2C1E16] text-[#FFFFFF] border-[#C5A059]'
+                              : 'bg-[#F6F1E9] text-[#6A5243] border-[#E2D5C3] hover:border-[#C5A059] hover:text-[#2C1E16]'
+                          }`}
+                        >
+                          {presetSize}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
 

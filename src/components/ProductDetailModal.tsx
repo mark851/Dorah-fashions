@@ -201,7 +201,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
               <div className="mt-4">
                 <div className="flex items-center justify-between text-xs text-[#6A5243] mb-2">
                   <span className="font-semibold text-[#2C1E16]">
-                    Available Sizes / Pack Options
+                    Sizes of Products
                   </span>
                   <span>{activeSize}</span>
                 </div>
