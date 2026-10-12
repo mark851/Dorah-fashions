@@ -96,6 +96,19 @@ function deriveEffectivePassword(cleanEmail: string, rawPassword?: string): stri
   return `Dorah#${hash}!26`;
 }
 
+export function getCanonicalUserEmail(email?: string | null): string {
+  if (!email) return '';
+  const clean = email.trim().toLowerCase();
+  return clean.replace(/\+(admin|sess)_[a-z0-9]+@/i, '@');
+}
+
+export function isRealCustomerAccount(user?: User | null): boolean {
+  if (!user || user.isAnonymous) return false;
+  const clean = getCanonicalUserEmail(user.email);
+  if (!clean || clean.startsWith('guest_')) return false;
+  return true;
+}
+
 export const initAuth = (
   onAuthSuccess?: (user: User, token: string | null) => void,
   onAuthFailure?: () => void

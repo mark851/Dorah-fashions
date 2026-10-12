@@ -19,6 +19,9 @@ import {
   googleSignIn,
   emailPasswordAuth,
   ensureCustomerSession,
+  getCanonicalUserEmail,
+  isRealCustomerAccount,
+  logout,
 } from '../firebase';
 import {
   CartItem,
@@ -75,8 +78,8 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   const [submitting, setSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // Optional Email/Password sign-in inside checkout
-  const [showEmailLogin, setShowEmailLogin] = useState(false);
+  // Customer account sign-in inside checkout
+  const [showEmailLogin, setShowEmailLogin] = useState(true);
   const [authPassword, setAuthPassword] = useState('');
   const [signingInEmail, setSigningInEmail] = useState(false);
 
@@ -87,11 +90,12 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
   }, [isOpen, initialStep]);
 
   useEffect(() => {
-    if (user?.displayName && !customerName) {
+    if (user?.displayName && !customerName && user.displayName !== 'Guest Customer') {
       setCustomerName(user.displayName);
     }
-    if (user?.email && !customerEmail) {
-      setCustomerEmail(user.email);
+    const cleanUserEmail = getCanonicalUserEmail(user?.email);
+    if (cleanUserEmail && !cleanUserEmail.startsWith('guest_') && !customerEmail) {
+      setCustomerEmail(cleanUserEmail);
     }
   }, [user]);
 
@@ -123,46 +127,54 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
 
   const handleSignInForCheckout = async () => {
     setErrorMsg(null);
+    setSigningInEmail(true);
     try {
-      const res = await googleSignIn();
+      const res = await googleSignIn(customerEmail, authPassword);
       if (res?.user) {
         if (!customerName && res.user.displayName) {
           setCustomerName(res.user.displayName);
         }
-        if (!customerEmail && res.user.email) {
-          setCustomerEmail(res.user.email);
+        const canonical = getCanonicalUserEmail(res.user.email);
+        if (!customerEmail && canonical) {
+          setCustomerEmail(canonical);
         }
       }
     } catch {
       setShowEmailLogin(true);
       setErrorMsg(
-        'If Google Sign-In is blocked by verification settings, sign in below with your Email & Password or place your order directly.'
+        'Enter your Email Address below and click "Sign In / Create Account with Email" to access your account for orders.'
       );
+    } finally {
+      setSigningInEmail(false);
     }
   };
 
   const handleEmailSignInForCheckout = async () => {
-    if (!customerEmail.trim() || authPassword.length < 6) {
+    if (!customerEmail.trim() || !customerEmail.includes('@')) {
       setErrorMsg(
-        'Please enter your Email Address below and a password of at least 6 characters.'
+        'Please enter your Email Address in the box below to sign in to your account.'
       );
       return;
     }
     setSigningInEmail(true);
     setErrorMsg(null);
     try {
-      await emailPasswordAuth({
+      const signedInUser = await emailPasswordAuth({
         email: customerEmail,
         password: authPassword,
         mode: 'signin',
         displayName: customerName || undefined,
       });
+      const canonical = getCanonicalUserEmail(signedInUser.email);
+      if (canonical) {
+        setCustomerEmail(canonical);
+      }
       setShowEmailLogin(false);
     } catch (err) {
       setErrorMsg(
         err instanceof Error
           ? err.message
-          : 'Could not sign in with Email & Password.'
+          : 'Could not sign in to your account.'
       );
     } finally {
       setSigningInEmail(false);
@@ -224,22 +236,19 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
 
     setSubmitting(true);
 
-    // Ensure the customer has an active Firebase Auth session (anonymous or email/google)
-    // so they never get blocked if they haven't signed in with Google yet!
+    // Automatically sign the customer into their account using their email address
+    // so their order is linked to their account and visible in "My Orders"
     let activeUser = user;
-    if (!activeUser) {
-      activeUser = await ensureCustomerSession();
-    }
-    if (!activeUser && authPassword.length >= 6) {
+    if (!isRealCustomerAccount(activeUser)) {
       try {
         activeUser = await emailPasswordAuth({
           email: cleanEmail,
-          password: authPassword,
+          password: authPassword || undefined,
           mode: 'signin',
           displayName: cleanName,
         });
       } catch {
-        // Ignore and fallback below
+        activeUser = await ensureCustomerSession();
       }
     }
 
@@ -499,89 +508,97 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 </div>
               )}
 
-              {!user ? (
-                <div className="p-4 bg-[#FFFFFF] border border-[#E2D5C3] rounded-xl space-y-2.5">
+              {!isRealCustomerAccount(user) ? (
+                <div className="p-4 bg-[#FFFFFF] border border-[#E2D5C3] rounded-xl space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-xs font-semibold text-[#2C1E16]">
                       <Lock className="w-4 h-4 text-[#A37E3B]" />
-                      <span>Instant Guest Checkout Enabled</span>
+                      <span>Sign In to Your Account for Orders</span>
                     </div>
                     <button
                       type="button"
                       onClick={() => setShowEmailLogin((prev) => !prev)}
                       className="text-xs font-semibold text-[#A37E3B] underline cursor-pointer"
                     >
-                      {showEmailLogin
-                        ? 'Hide Sign-In'
-                        : 'Sign In to Track Orders'}
+                      {showEmailLogin ? 'Hide Sign-In' : 'Open Sign-In'}
                     </button>
                   </div>
                   <p className="text-xs text-[#6A5243] leading-relaxed">
-                    Fill in your delivery information below and click{' '}
-                    <strong>Confirm Order</strong> (no login required), or sign
-                    in to track orders across devices.
+                    Sign in with your email below to link and track all your
+                    orders in <strong>My Orders</strong>.
                   </p>
 
                   {showEmailLogin && (
-                    <div className="pt-2 space-y-2.5 border-t border-[#E2D5C3]">
-                      <div className="flex gap-2">
+                    <div className="pt-2.5 space-y-2.5 border-t border-[#E2D5C3]">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <input
+                          type="email"
+                          value={customerEmail}
+                          onChange={(e) => setCustomerEmail(e.target.value)}
+                          placeholder="Your Email Address *"
+                          className="px-3 py-2 text-xs bg-[#F6F1E9] border border-[#E2D5C3] rounded-lg focus:outline-none focus:border-[#C5A059]"
+                        />
                         <input
                           type="password"
                           value={authPassword}
                           onChange={(e) => setAuthPassword(e.target.value)}
-                          placeholder="Password (min 6 chars)"
-                          className="flex-1 px-3 py-2 text-xs bg-[#F6F1E9] border border-[#E2D5C3] rounded-lg"
+                          placeholder="Password (optional)"
+                          className="px-3 py-2 text-xs bg-[#F6F1E9] border border-[#E2D5C3] rounded-lg focus:outline-none focus:border-[#C5A059]"
                         />
-                        <button
-                          type="button"
-                          disabled={signingInEmail}
-                          onClick={handleEmailSignInForCheckout}
-                          className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-[#FFFFFF] bg-[#2C1E16] border border-[#C5A059] rounded-lg cursor-pointer"
-                        >
-                          <Mail className="w-3.5 h-3.5 text-[#C5A059]" />
-                          <span>
-                            {signingInEmail ? 'Signing in...' : 'Email Sign-In'}
-                          </span>
-                        </button>
                       </div>
                       <button
                         type="button"
-                        onClick={handleSignInForCheckout}
-                        className="gsi-material-button"
+                        disabled={signingInEmail}
+                        onClick={handleEmailSignInForCheckout}
+                        className="w-full inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 text-xs font-semibold text-[#FFFFFF] bg-[#2C1E16] border border-[#C5A059] rounded-lg hover:bg-[#3F2C21] transition-colors cursor-pointer"
                       >
-                        <div className="gsi-material-button-state"></div>
-                        <div className="gsi-material-button-content-wrapper">
-                          <div className="gsi-material-button-icon">
-                            <svg
-                              version="1.1"
-                              xmlns="http://www.w3.org/2000/svg"
-                              viewBox="0 0 48 48"
-                              style={{ display: 'block' }}
-                            >
-                              <path
-                                fill="#EA4335"
-                                d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"
-                              ></path>
-                              <path
-                                fill="#4285F4"
-                                d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"
-                              ></path>
-                              <path
-                                fill="#FBBC05"
-                                d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"
-                              ></path>
-                              <path
-                                fill="#34A853"
-                                d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"
-                              ></path>
-                              <path fill="none" d="M0 0h48v48H0z"></path>
-                            </svg>
-                          </div>
-                          <span className="gsi-material-button-contents">
-                            Sign in with Google
-                          </span>
-                        </div>
+                        <Mail className="w-3.5 h-3.5 text-[#C5A059]" />
+                        <span>
+                          {signingInEmail
+                            ? 'Signing in to your account...'
+                            : 'Sign In / Create Account with Email'}
+                        </span>
                       </button>
+                      <div className="flex justify-center pt-1">
+                        <button
+                          type="button"
+                          onClick={handleSignInForCheckout}
+                          className="gsi-material-button"
+                        >
+                          <div className="gsi-material-button-state"></div>
+                          <div className="gsi-material-button-content-wrapper">
+                            <div className="gsi-material-button-icon">
+                              <svg
+                                version="1.1"
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 48 48"
+                                style={{ display: 'block' }}
+                              >
+                                <path
+                                  fill="#EA4335"
+                                  d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"
+                                ></path>
+                                <path
+                                  fill="#4285F4"
+                                  d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"
+                                ></path>
+                                <path
+                                  fill="#FBBC05"
+                                  d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"
+                                ></path>
+                                <path
+                                  fill="#34A853"
+                                  d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"
+                                ></path>
+                                <path fill="none" d="M0 0h48v48H0z"></path>
+                              </svg>
+                            </div>
+                            <span className="gsi-material-button-contents">
+                              Sign in with Google
+                            </span>
+                          </div>
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -589,9 +606,15 @@ export const CartDrawer: React.FC<CartDrawerProps> = ({
                 <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-900 flex items-center justify-between">
                   <span>
                     Signed in as{' '}
-                    {user.email || (user.isAnonymous ? 'Guest Session' : 'User')}
+                    <strong>{getCanonicalUserEmail(user?.email)}</strong>
                   </span>
-                  <span className="font-semibold">Active</span>
+                  <button
+                    type="button"
+                    onClick={() => logout()}
+                    className="font-semibold text-emerald-800 underline hover:text-emerald-950 cursor-pointer"
+                  >
+                    Switch Account
+                  </button>
                 </div>
               )}
 

@@ -17,11 +17,15 @@ import {
   Truck,
   AlertTriangle,
   Mail,
+  LogOut,
 } from 'lucide-react';
 import {
   db,
   googleSignIn,
   emailPasswordAuth,
+  getCanonicalUserEmail,
+  isRealCustomerAccount,
+  logout,
   OperationType,
   handleFirestoreError,
 } from '../firebase';
@@ -50,7 +54,7 @@ export const CustomerOrdersView: React.FC<CustomerOrdersViewProps> = ({
   const [signingIn, setSigningIn] = useState(false);
 
   useEffect(() => {
-    if (!user) {
+    if (!user || !isRealCustomerAccount(user)) {
       setOrders([]);
       return;
     }
@@ -144,17 +148,37 @@ export const CustomerOrdersView: React.FC<CustomerOrdersViewProps> = ({
           <h1 className="font-display text-3xl sm:text-4xl font-semibold text-[#2C1E16] mt-1">
             My DORAH FASHIONS Orders
           </h1>
+          {isRealCustomerAccount(user) && (
+            <p className="text-xs text-[#6A5243] mt-1">
+              Signed in as{' '}
+              <strong className="text-[#2C1E16]">
+                {getCanonicalUserEmail(user?.email)}
+              </strong>
+            </p>
+          )}
         </div>
-        <button
-          type="button"
-          onClick={onBackToShop}
-          className="px-4 py-2 text-xs font-semibold text-[#2C1E16] bg-[#FFFFFF] border border-[#E2D5C3] rounded-xl hover:border-[#C5A059] transition-colors self-start sm:self-auto cursor-pointer"
-        >
-          Return to Storefront
-        </button>
+        <div className="flex flex-wrap items-center gap-2.5 self-start sm:self-auto">
+          {isRealCustomerAccount(user) && (
+            <button
+              type="button"
+              onClick={() => logout()}
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold text-[#2C1E16] bg-[#FFFFFF] border border-[#E2D5C3] rounded-xl hover:border-[#C5A059] transition-colors cursor-pointer"
+            >
+              <LogOut className="w-3.5 h-3.5 text-[#A37E3B]" />
+              <span>Switch Account</span>
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={onBackToShop}
+            className="px-4 py-2 text-xs font-semibold text-[#2C1E16] bg-[#FFFFFF] border border-[#E2D5C3] rounded-xl hover:border-[#C5A059] transition-colors cursor-pointer"
+          >
+            Return to Storefront
+          </button>
+        </div>
       </div>
 
-      {!user ? (
+      {!isRealCustomerAccount(user) ? (
         <div className="mt-10 p-8 bg-[#FFFFFF] border border-[#E2D5C3] rounded-2xl max-w-md mx-auto space-y-5 shadow-xs">
           <div className="text-center">
             <Package className="w-10 h-10 text-[#C5A059] mx-auto mb-3" />
