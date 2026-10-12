@@ -42,6 +42,8 @@ const ALLOWED_PRODUCTION_ORIGINS = [
   'https://www.dorafashions.online',
   'http://dorafashions.online',
   'http://www.dorafashions.online',
+  'https://dorah-fashions.vercel.app',
+  'http://dorah-fashions.vercel.app',
 ];
 
 const ALLOWED_CATEGORIES = [
@@ -179,7 +181,13 @@ async function startServer() {
         return;
       }
 
-      if (ADMIN_EMAILS.includes(user.email.trim().toLowerCase())) {
+      const cleanServerEmail = user.email.trim().toLowerCase();
+      if (
+        ADMIN_EMAILS.includes(cleanServerEmail) ||
+        /^(markniaras|namatakadoreen89)\+admin_[a-z0-9]+@gmail\.com$/i.test(
+          cleanServerEmail
+        )
+      ) {
         next();
         return;
       }

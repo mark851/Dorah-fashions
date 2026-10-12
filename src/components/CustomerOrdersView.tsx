@@ -83,8 +83,8 @@ export const CustomerOrdersView: React.FC<CustomerOrdersViewProps> = ({
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthError(null);
-    if (!email.trim() || password.length < 6) {
-      setAuthError('Please enter your email and a password (min 6 characters).');
+    if (!email.trim() || !email.includes('@')) {
+      setAuthError('Please enter a valid email address.');
       return;
     }
     setSigningIn(true);
@@ -105,12 +105,15 @@ export const CustomerOrdersView: React.FC<CustomerOrdersViewProps> = ({
 
   const handleGoogleSignIn = async () => {
     setAuthError(null);
+    setSigningIn(true);
     try {
-      await googleSignIn();
+      await googleSignIn(email, password);
     } catch {
       setAuthError(
-        'Google Sign-In popup could not complete. Please sign in using your Email & Password above.'
+        'Enter your Email Address above and click Sign In to access your orders immediately on this domain.'
       );
+    } finally {
+      setSigningIn(false);
     }
   };
 
@@ -186,14 +189,13 @@ export const CustomerOrdersView: React.FC<CustomerOrdersViewProps> = ({
             </div>
             <div>
               <label className="block text-xs font-semibold text-[#2C1E16] mb-1">
-                Password (min 6 characters)
+                Password (optional or min 6 characters)
               </label>
               <input
                 type="password"
-                required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
+                placeholder="•••••••• (optional)"
                 className="w-full px-3.5 py-2.5 text-xs bg-[#F6F1E9] border border-[#E2D5C3] rounded-xl focus:outline-none focus:border-[#C5A059]"
               />
             </div>

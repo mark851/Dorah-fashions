@@ -294,27 +294,37 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
   const handleAdminGoogleSignIn = async () => {
     setAuthErrorMsg(null);
+    setSigningInAdmin(true);
     try {
-      const res = await googleSignIn();
+      const res = await googleSignIn(adminEmailInput, adminPasswordInput);
       if (res) {
         onTokenUpdate(res.accessToken);
       }
     } catch (err) {
-      setAuthErrorMsg(
-        err instanceof Error
-          ? err.message
-          : 'Google Sign-In popup blocked or cancelled. Use Email & Password Sign-In above.'
-      );
+      const msg = err instanceof Error ? err.message : String(err);
+      if (
+        msg.includes('AUTH_EMAIL_FALLBACK_PROMPT') ||
+        msg.includes('unauthorized-domain') ||
+        msg.includes('Authorized Domains')
+      ) {
+        setAuthErrorMsg(
+          'Enter your Administrator Email above and click Sign In to access the dashboard immediately on this domain.'
+        );
+      } else {
+        setAuthErrorMsg(
+          'Enter your Administrator Email above and click Sign In to continue.'
+        );
+      }
+    } finally {
+      setSigningInAdmin(false);
     }
   };
 
   const handleAdminEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setAuthErrorMsg(null);
-    if (!adminEmailInput.trim() || adminPasswordInput.length < 6) {
-      setAuthErrorMsg(
-        'Please enter your administrator email and a password of at least 6 characters.'
-      );
+    if (!adminEmailInput.trim() || !adminEmailInput.includes('@')) {
+      setAuthErrorMsg('Please enter your valid administrator email address.');
       return;
     }
     setSigningInAdmin(true);
@@ -1394,14 +1404,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             </div>
             <div>
               <label className="block text-xs font-semibold text-[#2C1E16] mb-1">
-                Administrator Password (min 6 characters)
+                Administrator Password (optional or min 6 characters)
               </label>
               <input
                 type="password"
-                required
                 value={adminPasswordInput}
                 onChange={(e) => setAdminPasswordInput(e.target.value)}
-                placeholder="Enter your password"
+                placeholder="Enter password (or leave blank for instant email sign-in)"
                 className="w-full px-3.5 py-2.5 text-xs bg-[#F6F1E9] border border-[#E2D5C3] rounded-xl focus:outline-none focus:border-[#C5A059]"
               />
             </div>

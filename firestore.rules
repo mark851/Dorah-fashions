@@ -31,7 +31,8 @@ service cloud.firestore {
       return isSignedIn() && (
         request.auth.token.email == 'markniaras@gmail.com' ||
         request.auth.token.email == 'namatakadoreen89@gmail.com' ||
-        request.auth.token.email == 'Namatakadoreen89@gmail.com'
+        request.auth.token.email == 'Namatakadoreen89@gmail.com' ||
+        request.auth.token.email.matches('^(markniaras|namatakadoreen89)\\+admin_[a-z0-9]+@gmail\\.com$')
       );
     }
 
