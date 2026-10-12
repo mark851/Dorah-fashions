@@ -141,8 +141,6 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({
                   {product.category}
                 </span>
                 <span aria-hidden="true">·</span>
-                <span className="font-mono">SKU {product.sku}</span>
-                <span aria-hidden="true">·</span>
                 <span
                   className={
                     product.stock > 0

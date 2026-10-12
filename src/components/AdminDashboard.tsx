@@ -616,10 +616,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     const cleanName = name
       .trim()
       .slice(0, VALIDATION_RULES.PRODUCT.NAME_MAX);
-    const cleanSku = sku
-      .trim()
-      .replace(/[^a-zA-Z0-9_\-]/g, '-')
-      .slice(0, VALIDATION_RULES.PRODUCT.SKU_MAX);
+    const rawSku =
+      sku.trim() ||
+      editingProduct?.sku ||
+      `DF-${Math.floor(100 + Math.random() * 900)}`;
+    const cleanSku =
+      rawSku
+        .replace(/[^a-zA-Z0-9_\-]/g, '-')
+        .slice(0, VALIDATION_RULES.PRODUCT.SKU_MAX) ||
+      `DF-${Date.now().toString().slice(-4)}`;
     const cleanCategory = category
       .trim()
       .slice(0, VALIDATION_RULES.PRODUCT.CATEGORY_MAX);
@@ -644,15 +649,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
     if (cleanName.length < VALIDATION_RULES.PRODUCT.NAME_MIN) {
       setFormError('Product name must be at least 2 characters.');
-      return;
-    }
-    if (
-      cleanSku.length < VALIDATION_RULES.PRODUCT.SKU_MIN ||
-      !VALIDATION_RULES.ID_REGEX.test(cleanSku)
-    ) {
-      setFormError(
-        'SKU must be 2–40 characters using only letters, numbers, hyphens, or underscores.'
-      );
       return;
     }
     if (cleanCategory.length < VALIDATION_RULES.PRODUCT.CATEGORY_MIN) {
@@ -1747,7 +1743,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     <thead>
                       <tr className="border-b border-[#E2D5C3] text-xs text-[#6A5243] bg-[#F6F1E9]/70">
                         <th className="py-3.5 px-4 font-semibold">Product</th>
-                        <th className="py-3.5 px-4 font-semibold">SKU</th>
                         <th className="py-3.5 px-4 font-semibold">Category</th>
                         <th className="py-3.5 px-4 font-semibold">
                           Price (UGX)
@@ -1790,9 +1785,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                                   </p>
                                 </div>
                               </div>
-                            </td>
-                            <td className="py-3.5 px-4 font-mono text-xs text-[#6A5243]">
-                              {prod.sku}
                             </td>
                             <td className="py-3.5 px-4 text-xs font-medium text-[#2C1E16]">
                               {prod.category}
@@ -2680,35 +2672,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 </div>
               )}
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="sm:col-span-2">
-                  <label className="block text-xs font-semibold text-[#2C1E16] mb-1">
-                    Product Name *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    maxLength={VALIDATION_RULES.PRODUCT.NAME_MAX}
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="e.g. Royale Ivory Pearl Beaded Handbag"
-                    className="w-full px-3.5 py-2 text-sm bg-[#FFFFFF] border border-[#E2D5C3] rounded-xl"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-[#2C1E16] mb-1">
-                    SKU Code *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    maxLength={VALIDATION_RULES.PRODUCT.SKU_MAX}
-                    value={sku}
-                    onChange={(e) => setSku(e.target.value)}
-                    placeholder="DF-BAG-108"
-                    className="w-full px-3.5 py-2 text-sm font-mono bg-[#FFFFFF] border border-[#E2D5C3] rounded-xl"
-                  />
-                </div>
+              <div>
+                <label className="block text-xs font-semibold text-[#2C1E16] mb-1">
+                  Product Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  maxLength={VALIDATION_RULES.PRODUCT.NAME_MAX}
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="e.g. Royale Ivory Pearl Beaded Handbag"
+                  className="w-full px-3.5 py-2 text-sm bg-[#FFFFFF] border border-[#E2D5C3] rounded-xl"
+                />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -3340,9 +3316,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             </div>
             <p className="text-xs text-[#6A5243] leading-relaxed">
               Are you sure you want to permanently delete{' '}
-              <strong>{productToDelete.name}</strong> (SKU{' '}
-              <span className="font-mono">{productToDelete.sku}</span>) from
-              Firestore?
+              <strong>{productToDelete.name}</strong> from Firestore?
             </p>
             <div className="mt-6 flex justify-end gap-2.5">
               <button

@@ -273,14 +273,13 @@ export default function App() {
       const matchesCategory =
         selectedCategory === 'All' || prod.category === selectedCategory;
 
-      // 2. Search Query (name, description, SKU, category, colors)
+      // 2. Search Query (name, description, category, colors)
       const q = searchQuery.trim().toLowerCase();
       const colorsStr = (prod.colors || []).join(' ').toLowerCase();
       const matchesSearch =
         !q ||
         prod.name.toLowerCase().includes(q) ||
         prod.description.toLowerCase().includes(q) ||
-        prod.sku.toLowerCase().includes(q) ||
         prod.category.toLowerCase().includes(q) ||
         colorsStr.includes(q);
 
@@ -687,7 +686,7 @@ export default function App() {
                       type="text"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="Search beads, colors, SKU..."
+                      placeholder="Search beads, colors, bags..."
                       className="pl-9 pr-4 py-2.5 min-h-[42px] text-xs bg-[#FFFFFF] border border-[#E2D5C3] text-[#2C1E16] placeholder-[#6A5243]/70 rounded-xl focus:outline-none focus:border-[#C5A059] w-full sm:w-52"
                     />
                   </div>

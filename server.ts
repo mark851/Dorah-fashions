@@ -315,9 +315,13 @@ async function startServer() {
     ) {
       errors.push('Product name must be 2–120 characters.');
     }
-    if (typeof sku !== 'string' || !/^[a-zA-Z0-9_\-]{2,40}$/.test(sku)) {
+    if (
+      sku !== undefined &&
+      sku !== '' &&
+      (typeof sku !== 'string' || !/^[a-zA-Z0-9_\-]{2,40}$/.test(sku))
+    ) {
       errors.push(
-        'SKU must be 2–40 alphanumeric characters, hyphens, or underscores.'
+        'Product identifier must be 2–40 alphanumeric characters, hyphens, or underscores.'
       );
     }
     if (typeof category !== 'string' || category.trim().length < 2 || category.length > 60) {
